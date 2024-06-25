@@ -9,6 +9,7 @@ import Password from '../components/Password';
 import Loading from '../components/Loading';
 import LoadingSuccessFailure from '../components/LoadingSuccessFailure';
 import Navbar from '../components/Navbar';
+import { set } from 'firebase/database';
 
 export default function Home() {
 
@@ -54,17 +55,37 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        const unsub = onSnapshot(collection(db, "passwords"), (snapshot) => {
+        if (!idToken) return;
+        const unsub = onSnapshot(collection(db, "passwords"), async (snapshot) => {
             let list = [];
             snapshot.docs.forEach((doc) => {
                 if (doc.data().uid === userId) {
                     list.push({ id: doc.id, ...doc.data() });
                 }
             });
-            setPasswordList(list);
+
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/decryptPasswords`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({
+                    "passwords": list,
+                }),
+            });
+            const result = await response.json();
+            setPasswordList(result.message);
         },
             (error) => {
-                console.log(error);
+                setAlerts({
+                    alertSuccessFailure: true,
+                    success: false,
+                    message: 'Failed to load all passwords'
+                });
+                setTimeout(() => {
+                    setAlerts({});
+                }, 2000);
             }
         );
         return () => {
@@ -79,7 +100,6 @@ export default function Home() {
                 navigate("/Login")
                 setAlerts({});
             }).catch((error) => {
-                console.log(error.message);
                 setAlerts({ alertSuccessFailure: true, success: false, message: "Error Logging out" });
                 setTimeout(() => {
                     setAlerts({});
@@ -115,7 +135,6 @@ export default function Home() {
                 }
 
                 const result = await response.json();
-                console.log('Success:', result);
                 setAlerts({ alertSuccessFailure: true, success: true, message: "Password deleted successfully" });
 
                 setTimeout(() => {
@@ -127,8 +146,6 @@ export default function Home() {
                 setTimeout(() => {
                     setAlerts({});
                 }, 2000);
-
-                console.log(error);
             }
         }
 
@@ -139,7 +156,6 @@ export default function Home() {
     }
 
     const handleAddPasswordClick = () => {
-        console.log("Add password click");
         setPasswordDialog({
             showAddPasswordDialog: true,
             showEditPasswordDialog: false
@@ -175,7 +191,6 @@ export default function Home() {
                 }
 
                 const result = await response.json();
-                console.log('Success:', result);
                 setAlerts({ alertSuccessFailure: true, success: true, message: "Password added successfully" });
                 setTimeout(() => {
                     setAlerts({});
@@ -217,7 +232,6 @@ export default function Home() {
 
     const handleEditPassword = async (params) => {
         setPasswordDialog({});
-        console.log(process.env.REACT_APP_BASE_URL);
         if (params) {
             setAlerts({ alertProcess: true, message: "Updating password" });
             try {
@@ -249,7 +263,6 @@ export default function Home() {
                 }
 
                 const result = await response.json();
-                console.log('Success:', result);
 
                 setAlerts({
                     alertSuccessFailure: true,
@@ -274,12 +287,12 @@ export default function Home() {
         }
     }
 
-    if (!passwordList)
+    if (!passwordList || !idToken)
         return <p>Loading...</p>
 
     return (
         <>
-            <Navbar logout={handleLogout} />
+            <Navbar reduceOpacity={passwordDialog.showAddPasswordDialog || passwordDialog.showEditPasswordDialog || confirmationDialog.showConfirmDeleteDialog ? true : false} logout={handleLogout} />
             {passwordDialog.showAddPasswordDialog && <Password passwordDialogTitle="Add a new password" passwordDialogService="" passwordDialogUsername="" passwordDialogPassword="" passwordDialogButtonText="Add Password" onPasswordDialogClose={handleAddPassword} />}
 
             {passwordDialog.showEditPasswordDialog && <Password passwordDialogTitle="Edit Password" passwordDialogService={passwordDialog.service} passwordDialogUsername={passwordDialog.username} passwordDialogPassword={passwordDialog.password} passwordDialogButtonText="Update Password" onPasswordDialogClose={handleEditPassword} />}
@@ -289,8 +302,8 @@ export default function Home() {
             {alerts.alertSuccessFailure && <LoadingSuccessFailure success={alerts.success} loadingSuccessMessage={alerts.message} />}
 
             {confirmationDialog.showConfirmDeleteDialog && <ConfirmationDialog onConfirmationClose={handleDeletePassword} />}
-
-            <div className="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-xl bg-clip-border">
+            
+            <div className={`${passwordDialog.showAddPasswordDialog || passwordDialog.showEditPasswordDialog || confirmationDialog.showConfirmDeleteDialog ? 'opacity-40' : ''} relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-xl bg-clip-border`}>
                 <div className="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white rounded-none bg-clip-border">
                     <div className="flex items-center justify-between gap-8 mb-8">
                         <div>
@@ -406,6 +419,7 @@ export default function Home() {
                             })}
                         </tbody>
                     </table>
+                    {passwordList.length == 0 && <div className="text-center my-5">No Passwords Found</div>}
                 </div>
                 {/* <div className="flex items-center justify-between p-4 border-t border-blue-gray-50">
           <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">

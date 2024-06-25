@@ -3,7 +3,6 @@ import success_icon from '../assets/icons/success_icon.png';
 import error_icon from '../assets/icons/error_icon.png';
 
 export default function LoadingSuccess({ success, loadingSuccessMessage }) {
-    console.log("success: ",success);
     return (
         <>
             <div className='flex justify-center'>

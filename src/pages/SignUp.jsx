@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../config/firebase-config';
-import { getAuth, updateProfile, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, signInWithRedirect, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, updateProfile, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from "firebase/auth";
 import '../index.css';
 import google_logo from '../assets/icons/google-logo.png';
 import Loading from '../components/Loading';
@@ -74,7 +74,6 @@ export default function SignUp() {
                                 }, 1000);
                             });
                     })
-                    console.log(user);
                 })
                 .catch((error) => {
                     if (error.code == 'auth/email-already-in-use')
@@ -87,19 +86,22 @@ export default function SignUp() {
         }
     };
 
-    const handleSignInWithGoogle = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithRedirect(auth, provider);
+    // Before deployment fix issue here
+    const handleSignInWithGoogle = async () => {
+        signInWithRedirect(auth, new GoogleAuthProvider());
+        // After the page redirects back
+        const userCred = await getRedirectResult(auth);
+
+        const userCred1 = await signInWithPopup(auth, new GoogleAuthProvider());
+
     };
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log(user);
                 if (user.emailVerified)
                     navigate('/Home');
-            } else {
-                console.log("No user logged in...");
             }
         });
 

@@ -29,9 +29,6 @@ export default function Password({ passwordDialogTitle, passwordDialogService, p
                 password: password
             });
         }
-        else{
-            console.log("Invalid");
-        }
     }
 
     return (
@@ -59,21 +56,21 @@ export default function Password({ passwordDialogTitle, passwordDialogService, p
                                     <input type="text" name="service" id="service" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter Service Name" required=""
                                         value={service}
                                         onChange={(e) => setService(e.target.value)} />
-                                    <p className="mt-2 text-sm text-red-600 dark:text-slate-300">{errors.service}</p>
+                                    <p className="mt-2 text-sm text-red-600 dark:text-red-300">{errors.service}</p>
                                 </div>
                                 <div className="col-span-2">
                                     <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
                                     <input type="text" name="username" id="username" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter Your Username" required=""
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)} />
-                                    <p className="mt-2 text-sm text-red-600 dark:text-slate-300">{errors.username}</p>
+                                    <p className="mt-2 text-sm text-red-600 dark:text-red-300">{errors.username}</p>
                                 </div>
                                 <div className="col-span-2">
                                     <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
                                     <input type="password" name="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter Your Password" required=""
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)} />
-                                    <p className="mt-2 text-sm text-red-600 dark:text-slate-300">{errors.password}</p>
+                                    <p className="mt-2 text-sm text-red-600 dark:text-red-300">{errors.password}</p>
                                 </div>
                             </div>
                             <button type="submit"
